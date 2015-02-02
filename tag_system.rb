@@ -46,6 +46,14 @@ class TagRulebook < Struct.new(:deletion_number, :rules)
       rule.to_cyclic(encoder)
     end
   end
+
+  def cyclic_padding_rules(encoder)
+    Array.new(encoder.alphabet.length, CyclicTagRule.new('')) * (deletion_number - 1)
+  end
+
+  def to_cyclic(encoder)
+    CyclicTagRulebook.new(cyclic_rules(encoder) + cyclic_padding_rules(encoder))
+  end
 end
 
 class TagSystem < Struct.new(:current_string, :rulebook)
@@ -68,6 +76,10 @@ class TagSystem < Struct.new(:current_string, :rulebook)
 
   def encoder
     CyclicTagEncoder.new(alphabet)
+  end
+
+  def to_cyclic
+    TagSystem.new(encoder.encode_string(current_string), rulebook.to_cyclic(encoder))
   end
 end
 
